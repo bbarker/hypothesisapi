@@ -53,6 +53,15 @@ class API(object):
                 "admin" : ["acct:{user}@hypothes.is".format(user=user)]
                 }
             payload_out["permissions"] = perms
+        if not "document" in payload:
+            doc = {}
+            payload_out["document"] = doc
+        if not "tags" in payload:
+            tags = []
+            payload_out["tags"] = tags
+        if not "target" in payload:
+            target = []
+            payload_out["target"] = target
         data = json.dumps(payload_out)
         headers = {"content-type": "application/json;charset=UTF-8",
                    "X-Annotator-Auth-Token": self.token, 
