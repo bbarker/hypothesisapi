@@ -38,13 +38,13 @@ class API(object):
 
     def create (self, payload):
         
-        url = self.api_url + "/annotations"
-
         user = self.username
         user_acct = "acct:{user}@hypothes.is".format(user=user)
         
         payload_out = payload.copy()
         payload_out["user"] = user_acct
+        if not "uri" in payload:
+            return None
         if not "permissions" in payload:
             perms = {
                 "read"  : ["group:__world__"],
@@ -56,18 +56,36 @@ class API(object):
         if not "document" in payload:
             doc = {}
             payload_out["document"] = doc
+        if not "text" in payload:
+            payload_out["text"] = None            
         if not "tags" in payload:
-            tags = []
-            payload_out["tags"] = tags
-        if not "target" in payload:
-            target = []
+            payload_out["tags"] = None
+        if not "target" in payload: 
+            target = [
+                {
+                "selector": 
+                    [
+                        {
+                        "start": None,
+                        "end": None,
+                        "type": "TextPositionSelector"
+                        }, 
+                        {
+                        "type": "TextQuoteSelector", 
+                        "prefix": None,
+                        "exact": None,
+                        "suffix": None
+                        },
+                    ]
+                }
+            ]
             payload_out["target"] = target
         data = json.dumps(payload_out)
         headers = {"content-type": "application/json;charset=UTF-8",
                    "X-Annotator-Auth-Token": self.token, 
                    "x-csrf-token": self.csrf_token
                    }
-        r = requests.post(url, headers = headers, data = data)
+        r = requests.post(self.api_url + "/annotations", headers = headers, data = data)
         if r.status_code == 200:
             return r.json()
         else:
